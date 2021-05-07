@@ -140,7 +140,7 @@ class _InputState extends State<Input> {
             if (widget.onSendPressed != null) ...[
               _buildTextField(),
             ] else
-              _buildChannelView(),
+              Expanded(child: _buildChannelView()),
           ],
         ),
       ),
