@@ -80,40 +80,6 @@ class _InputState extends State<Input> {
     }
   }
 
-  Widget _buildTextField() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _textController,
-            decoration: InputDecoration.collapsed(
-              hintStyle: InheritedChatTheme.of(context).theme.body1.copyWith(
-                    color: InheritedChatTheme.of(context)
-                        .theme
-                        .inputTextColor
-                        .withOpacity(0.5),
-                  ),
-              hintText: InheritedL10n.of(context).l10n.inputPlaceholder,
-            ),
-            keyboardType: TextInputType.multiline,
-            maxLines: 5,
-            minLines: 1,
-            style: InheritedChatTheme.of(context).theme.body1.copyWith(
-                  color: InheritedChatTheme.of(context).theme.inputTextColor,
-                ),
-            textCapitalization: TextCapitalization.sentences,
-          ),
-        ),
-        Visibility(
-          visible: _sendButtonVisible,
-          child: SendButton(
-            onPressed: _handleSendPressed,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildChannelView() {
     return const Center(
       child: Text('Sender does not support replies'),
@@ -138,7 +104,35 @@ class _InputState extends State<Input> {
           children: [
             if (widget.onAttachmentPressed != null) _leftWidget(),
             if (widget.onSendPressed != null) ...[
-              _buildTextField(),
+              Expanded(
+                child: TextField(
+                  controller: _textController,
+                  decoration: InputDecoration.collapsed(
+                    hintStyle:
+                        InheritedChatTheme.of(context).theme.body1.copyWith(
+                              color: InheritedChatTheme.of(context)
+                                  .theme
+                                  .inputTextColor
+                                  .withOpacity(0.5),
+                            ),
+                    hintText: InheritedL10n.of(context).l10n.inputPlaceholder,
+                  ),
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 5,
+                  minLines: 1,
+                  style: InheritedChatTheme.of(context).theme.body1.copyWith(
+                        color:
+                            InheritedChatTheme.of(context).theme.inputTextColor,
+                      ),
+                  textCapitalization: TextCapitalization.sentences,
+                ),
+              ),
+              Visibility(
+                visible: _sendButtonVisible,
+                child: SendButton(
+                  onPressed: _handleSendPressed,
+                ),
+              ),
             ] else
               Expanded(child: _buildChannelView()),
           ],
