@@ -93,13 +93,21 @@ class TextMessage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _textWidget(_user, context),
-          const SizedBox(height: 8,),
-          Text(message.authorId, style: InheritedChatTheme.of(context).theme.body1.copyWith(
-            fontSize: 14,
-            color: _user.id == message.authorId
-                ? InheritedChatTheme.of(context).theme.primaryTextColor
-                : InheritedChatTheme.of(context).theme.secondaryTextColor,
-          ),),
+          const SizedBox(
+            height: 8,
+          ),
+          if (message.metadata?['senderName'] != null)
+            Text(
+              message.metadata!['senderName'].toString(),
+              style: InheritedChatTheme.of(context).theme.body1.copyWith(
+                    fontSize: 14,
+                    color: _user.id == message.authorId
+                        ? InheritedChatTheme.of(context).theme.primaryTextColor
+                        : InheritedChatTheme.of(context)
+                            .theme
+                            .secondaryTextColor,
+                  ),
+            ),
         ],
       ),
     );
