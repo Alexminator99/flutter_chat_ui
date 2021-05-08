@@ -97,35 +97,43 @@ class _InputState extends State<Input> {
         child: Row(
           children: [
             if (widget.onAttachmentPressed != null) _leftWidget(),
-            Expanded(
-              child: TextField(
-                controller: _textController,
-                decoration: InputDecoration.collapsed(
-                  hintStyle:
-                      InheritedChatTheme.of(context).theme.body1.copyWith(
-                            color: InheritedChatTheme.of(context)
-                                .theme
-                                .inputTextColor
-                                .withOpacity(0.5),
-                          ),
-                  hintText: InheritedL10n.of(context).l10n.inputPlaceholder,
+            if (widget.onSendPressed == null) ...[
+              const Expanded(
+                  child: Center(
+                child: Text('Sender does not support replies'),
+              )),
+            ],
+            if (widget.onSendPressed != null) ...[
+              Expanded(
+                child: TextField(
+                  controller: _textController,
+                  decoration: InputDecoration.collapsed(
+                    hintStyle:
+                        InheritedChatTheme.of(context).theme.body1.copyWith(
+                              color: InheritedChatTheme.of(context)
+                                  .theme
+                                  .inputTextColor
+                                  .withOpacity(0.5),
+                            ),
+                    hintText: InheritedL10n.of(context).l10n.inputPlaceholder,
+                  ),
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 5,
+                  minLines: 1,
+                  style: InheritedChatTheme.of(context).theme.body1.copyWith(
+                        color:
+                            InheritedChatTheme.of(context).theme.inputTextColor,
+                      ),
+                  textCapitalization: TextCapitalization.sentences,
                 ),
-                keyboardType: TextInputType.multiline,
-                maxLines: 5,
-                minLines: 1,
-                style: InheritedChatTheme.of(context).theme.body1.copyWith(
-                      color:
-                          InheritedChatTheme.of(context).theme.inputTextColor,
-                    ),
-                textCapitalization: TextCapitalization.sentences,
               ),
-            ),
-            Visibility(
-              visible: _sendButtonVisible,
-              child: SendButton(
-                onPressed: _handleSendPressed,
+              Visibility(
+                visible: _sendButtonVisible,
+                child: SendButton(
+                  onPressed: _handleSendPressed,
+                ),
               ),
-            ),
+            ]
           ],
         ),
       ),
