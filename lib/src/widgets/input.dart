@@ -97,12 +97,8 @@ class _InputState extends State<Input> {
         child: Row(
           children: [
             if (widget.onAttachmentPressed != null) _leftWidget(),
-            if (widget.onSendPressed == null) ...[
-              const Expanded(
-                  child: Center(
-                child: Text('Sender does not support replies'),
-              )),
-            ],
+            if (widget.onSendPressed == null)
+              const Center(child: Text('Sender does not support replies')),
             if (widget.onSendPressed != null) ...[
               Expanded(
                 child: TextField(
