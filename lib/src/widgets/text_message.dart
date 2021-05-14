@@ -92,10 +92,6 @@ class TextMessage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _textWidget(_user, context),
-          const SizedBox(
-            height: 8,
-          ),
           if (message.metadata?['senderName'] != null)
             Text(
               message.metadata!['senderName'].toString(),
@@ -108,6 +104,10 @@ class TextMessage extends StatelessWidget {
                             .secondaryTextColor,
                   ),
             ),
+          const SizedBox(
+            height: 8,
+          ),
+          _textWidget(_user, context),
         ],
       ),
     );
