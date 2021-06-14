@@ -27,7 +27,7 @@ class Input extends StatefulWidget {
 
   /// Will be called on [SendButton] tap. Has [types.PartialText] which can
   /// be transformed to [types.TextMessage] and added to the messages list.
-  final void Function(types.PartialText) onSendPressed;
+  final void Function(types.PartialText)? onSendPressed;
 
   @override
   _InputState createState() => _InputState();
@@ -52,7 +52,7 @@ class _InputState extends State<Input> {
 
   void _handleSendPressed() {
     final _partialText = types.PartialText(text: _textController.text.trim());
-    widget.onSendPressed(_partialText);
+    widget.onSendPressed!(_partialText);
     _textController.clear();
   }
 
@@ -108,19 +108,24 @@ class _InputState extends State<Input> {
                 child: TextField(
                   controller: _textController,
                   decoration: InputDecoration.collapsed(
-                    hintStyle:
-                        InheritedChatTheme.of(context).theme.body1.copyWith(
-                              color: InheritedChatTheme.of(context)
-                                  .theme
-                                  .inputTextColor
-                                  .withOpacity(0.5),
-                            ),
+                    hintStyle: InheritedChatTheme.of(context)
+                        .theme
+                        .inputTextStyle
+                        .copyWith(
+                          color: InheritedChatTheme.of(context)
+                              .theme
+                              .inputTextColor
+                              .withOpacity(0.5),
+                        ),
                     hintText: InheritedL10n.of(context).l10n.inputPlaceholder,
                   ),
                   keyboardType: TextInputType.multiline,
                   maxLines: 5,
                   minLines: 1,
-                  style: InheritedChatTheme.of(context).theme.body1.copyWith(
+                  style: InheritedChatTheme.of(context)
+                      .theme
+                      .inputTextStyle
+                      .copyWith(
                         color:
                             InheritedChatTheme.of(context).theme.inputTextColor,
                       ),

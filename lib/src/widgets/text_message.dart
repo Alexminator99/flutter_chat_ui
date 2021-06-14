@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_link_previewer/flutter_link_previewer.dart'
     show LinkPreview, REGEX_LINK;
+import '../util.dart';
 import 'inherited_chat_theme.dart';
 import 'inherited_user.dart';
 
@@ -12,6 +13,8 @@ class TextMessage extends StatelessWidget {
     Key? key,
     required this.message,
     this.onPreviewDataFetched,
+    required this.usePreviewData,
+    required this.showName,
   }) : super(key: key);
 
   /// [types.TextMessage]
@@ -20,6 +23,12 @@ class TextMessage extends StatelessWidget {
   /// See [LinkPreview.onPreviewDataFetched]
   final void Function(types.TextMessage, types.PreviewData)?
       onPreviewDataFetched;
+
+  /// Show user name for the received message. Useful for a group chat.
+  final bool showName;
+
+  /// Enables link (URL) preview
+  final bool usePreviewData;
 
   void _onPreviewDataFetched(types.PreviewData previewData) {
     if (message.previewData == null) {
@@ -32,22 +41,36 @@ class TextMessage extends StatelessWidget {
     double width,
     BuildContext context,
   ) {
-    final color = user.id == message.authorId
-        ? InheritedChatTheme.of(context).theme.primaryTextColor
-        : InheritedChatTheme.of(context).theme.secondaryTextColor;
+    final bodyTextStyle = user.id == message.author.id
+        ? InheritedChatTheme.of(context).theme.sentMessageBodyTextStyle
+        : InheritedChatTheme.of(context).theme.receivedMessageBodyTextStyle;
+    final linkDescriptionTextStyle = user.id == message.author.id
+        ? InheritedChatTheme.of(context)
+            .theme
+            .sentMessageLinkDescriptionTextStyle
+        : InheritedChatTheme.of(context)
+            .theme
+            .receivedMessageLinkDescriptionTextStyle;
+    final linkTitleTextStyle = user.id == message.author.id
+        ? InheritedChatTheme.of(context).theme.sentMessageLinkTitleTextStyle
+        : InheritedChatTheme.of(context)
+            .theme
+            .receivedMessageLinkTitleTextStyle;
+
+    final color = getUserAvatarNameColor(message.author,
+        InheritedChatTheme.of(context).theme.userAvatarNameColors);
+    final name = getUserName(message.author);
 
     return LinkPreview(
       enableAnimation: true,
-      linkStyle: InheritedChatTheme.of(context).theme.body1.copyWith(
-            color: color,
-          ),
-      metadataTextStyle: InheritedChatTheme.of(context).theme.body2.copyWith(
-            color: color,
-          ),
-      metadataTitleStyle:
-          InheritedChatTheme.of(context).theme.subtitle1.copyWith(
-                color: color,
-              ),
+      header: showName ? name : null,
+      headerStyle: InheritedChatTheme.of(context)
+          .theme
+          .userNameTextStyle
+          .copyWith(color: color),
+      linkStyle: bodyTextStyle,
+      metadataTextStyle: linkDescriptionTextStyle,
+      metadataTitleStyle: linkTitleTextStyle,
       onPreviewDataFetched: _onPreviewDataFetched,
       padding: const EdgeInsets.symmetric(
         horizontal: 24,
@@ -55,22 +78,42 @@ class TextMessage extends StatelessWidget {
       ),
       previewData: message.previewData,
       text: message.text,
-      textStyle: InheritedChatTheme.of(context).theme.body1.copyWith(
-            color: color,
-          ),
+      textStyle: bodyTextStyle,
       width: width,
     );
   }
 
   Widget _textWidget(types.User user, BuildContext context) {
-    return Text(
-      message.text,
-      style: InheritedChatTheme.of(context).theme.body1.copyWith(
-            color: user.id == message.authorId
-                ? InheritedChatTheme.of(context).theme.primaryTextColor
-                : InheritedChatTheme.of(context).theme.secondaryTextColor,
+    final color = getUserAvatarNameColor(message.author,
+        InheritedChatTheme.of(context).theme.userAvatarNameColors);
+    final name = getUserName(message.author);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (showName)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6.0),
+            child: Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: InheritedChatTheme.of(context)
+                  .theme
+                  .userNameTextStyle
+                  .copyWith(color: color),
+            ),
           ),
-      textWidthBasis: TextWidthBasis.longestLine,
+        SelectableText(
+          message.text,
+          style: user.id == message.author.id
+              ? InheritedChatTheme.of(context).theme.sentMessageBodyTextStyle
+              : InheritedChatTheme.of(context)
+                  .theme
+                  .receivedMessageBodyTextStyle,
+          textWidthBasis: TextWidthBasis.longestLine,
+        ),
+      ],
     );
   }
 
@@ -82,34 +125,16 @@ class TextMessage extends StatelessWidget {
     final urlRegexp = RegExp(REGEX_LINK);
     final matches = urlRegexp.allMatches(message.text.toLowerCase());
 
-    if (matches.isNotEmpty) return _linkPreview(_user, _width, context);
+    if (matches.isNotEmpty && usePreviewData && onPreviewDataFetched != null) {
+      return _linkPreview(_user, _width, context);
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: 24,
         vertical: 16,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (message.metadata?['senderName'] != null)
-            Text(
-              message.metadata!['senderName'].toString(),
-              style: InheritedChatTheme.of(context).theme.body1.copyWith(
-                    fontSize: 14,
-                    color: _user.id == message.authorId
-                        ? InheritedChatTheme.of(context).theme.primaryTextColor
-                        : InheritedChatTheme.of(context)
-                            .theme
-                            .secondaryTextColor,
-                  ),
-            ),
-          const SizedBox(
-            height: 8,
-          ),
-          _textWidget(_user, context),
-        ],
-      ),
+      child: _textWidget(_user, context),
     );
   }
 }

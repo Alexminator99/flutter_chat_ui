@@ -34,7 +34,8 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   List<types.Message> _messages = [];
-  final _user = const types.User(id: '06c33e8b-e835-4736-80f4-63f44b66666c');
+  final _user = const types.User(
+      id: '06c33e8b-e835-4736-80f4-63f44b66666c', firstName: "Alex");
 
   @override
   void initState() {
@@ -98,12 +99,12 @@ class _ChatPageState extends State<ChatPage> {
 
     if (result != null) {
       final message = types.FileMessage(
-        authorId: _user.id,
-        fileName: result.files.single.name ?? '',
+        author: _user,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        name: result.files.single.name,
         id: const Uuid().v4(),
         mimeType: lookupMimeType(result.files.single.path ?? ''),
-        size: result.files.single.size ?? 0,
-        timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).floor(),
+        size: result.files.single.size,
         uri: result.files.single.path ?? '',
       );
 
@@ -123,15 +124,15 @@ class _ChatPageState extends State<ChatPage> {
     if (result != null) {
       final bytes = await result.readAsBytes();
       final image = await decodeImageFromList(bytes);
-      final imageName = result.path.split('/').last;
+      final name = result.path.split('/').last;
 
       final message = types.ImageMessage(
-        authorId: _user.id,
+        author: _user,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
         height: image.height.toDouble(),
         id: const Uuid().v4(),
-        imageName: imageName,
+        name: name,
         size: bytes.length,
-        timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).floor(),
         uri: result.path,
         width: image.width.toDouble(),
       );
@@ -153,20 +154,21 @@ class _ChatPageState extends State<ChatPage> {
     types.PreviewData previewData,
   ) {
     final index = _messages.indexWhere((element) => element.id == message.id);
-    final currentMessage = _messages[index] as types.TextMessage;
-    final updatedMessage = currentMessage.copyWith(previewData: previewData);
+    final updatedMessage = _messages[index].copyWith(previewData: previewData);
 
-    setState(() {
-      _messages[index] = updatedMessage;
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      setState(() {
+        _messages[index] = updatedMessage;
+      });
     });
   }
 
   void _handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
-      authorId: _user.id,
+      author: _user,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
       id: const Uuid().v4(),
       text: message.text,
-      timestamp: (DateTime.now().millisecondsSinceEpoch / 1000).floor(),
     );
 
     _addMessage(textMessage);
@@ -190,6 +192,7 @@ class _ChatPageState extends State<ChatPage> {
         messages: _messages,
         onAttachmentPressed: _handleAtachmentPressed,
         onMessageTap: _handleMessageTap,
+        showUserNames: true,
         onPreviewDataFetched: _handlePreviewDataFetched,
         onSendPressed: _handleSendPressed,
         user: _user,
